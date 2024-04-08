@@ -32,10 +32,14 @@ class Bricks():
         self.spacing = 4
         self.cordinates = []
         self.random_color = []
+        self.point_values = {}  # Store point values for each brick
+        points = 1
         for i in range(10, self.rows*(self.width), self.width):
             for j in range(int(scr_width*0.1), int(scr_width*0.9 - self.length)+1, self.length):
                 self.cordinates.append([j, i])
                 self.random_color.append(random.choice(brick_color))
+                self.point_values[(j, i)] = points
+            points += 1
 
     def show(self):
         num = 1
@@ -159,22 +163,22 @@ def brick_collision(brick, brick_list, brick_breaked, ball):
             ball.y_vel = -ball.y_vel
             brick_breaked.append(item)
             brick_list.pop(index)
-            score += 1  # Increment score when a brick is hit
+            score += brick.point_values[(x, y)]  # Increment score based on brick's point value
         elif y < ball.ballY and ball.ballY < (y + brick.width) and (ball.ballX + ball.ball_radius) > x and ball.ballX < x:
             ball.x_vel = -ball.x_vel
             brick_breaked.append(item)
             brick_list.pop(index)
-            score += 1  # Increment score when a brick is hit
+            score += brick.point_values[(x, y)]  # Increment score based on brick's point value
         elif y < ball.ballY and ball.ballY < (y + brick.width) and (ball.ballX - ball.ball_radius) < (x + brick.length) and ball.ballX > (x + brick.length):
             ball.x_vel = -ball.x_vel
             brick_breaked.append(item)
             brick_list.pop(index)
-            score += 1  # Increment score when a brick is hit
+            score += brick.point_values[(x, y)]  # Increment score based on brick's point value
         elif x < ball.ballX and ball.ballX < (x + brick.length) and (ball.ballY - ball.ball_radius) < (y + brick.width) and ball.ballY > (y + brick.width):
             ball.y_vel = -ball.y_vel
             brick_breaked.append(item)
             brick_list.pop(index)
-            score += 1  # Increment score when a brick is hit
+            score += brick.point_values[(x, y)]  # Increment score based on brick's point value
 
 
 def show_gameover():
@@ -236,17 +240,14 @@ while True:
         ball.move()
         ball.boundaries()
         ball.limit_vel()
-
-        # must review code in the first inequality statement
+        #  must review code in the first inequality statement
         if paddle.paddleY + 10 > (ball.ballY + ball.ball_radius) > paddle.paddleY and ball.ballX > paddle.paddleX and ball.ballX < (paddle.paddleX + paddle.length):
             ball.collision_change()
-
         # brick collision
         brick_collision(brick, brick_list, brick_breaked, ball)
 
         # paddle boundaries
         paddle.boundaries()
-
         if ball.ballY > scr_height:
             show_gameover()
             over = True
