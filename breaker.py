@@ -1,3 +1,4 @@
+import pygame
 import random
 from button import Button
 
@@ -18,7 +19,6 @@ brick_color = [(200, 50, 80), (45, 80, 240), (46, 235, 70),
 
 
 class Bricks():
-
     global screen
     global scr_width
     global scr_height
@@ -47,8 +47,6 @@ class Bricks():
             if num > color_index * self.rows_bricks:
                 color_index += 1
 
-        # self.random_color[num]
-
     def clone(self):
         brick_list = []
         for item in self.cordinates:
@@ -61,7 +59,6 @@ class Bricks():
 
 
 class Paddle():
-
     global screen
     global scr_height
     global scr_width
@@ -88,7 +85,7 @@ class Paddle():
     def stop(self):
         self.velocity = 0
 
-    def boundries(self):
+    def boundaries(self):
         if self.paddleX >= (scr_width - self.length):
             self.paddleX = scr_width - self.length
         elif self.paddleX <= 0:
@@ -100,7 +97,6 @@ paddle = Paddle(int(scr_width*0.45))
 
 
 class Ball():
-
     global screen
     global ball_color
     global paddle
@@ -136,7 +132,7 @@ class Ball():
             ratio = (self.ballX - center)//(paddle.length//2)
             self.x_vel += self.max_x_vel * ratio
 
-    def boundries(self):
+    def boundaries(self):
 
         if self.ballY <= (0 + self.ball_radius):
             self.y_vel = -self.y_vel
@@ -154,6 +150,7 @@ class Ball():
 
 
 def brick_collision(brick, brick_list, brick_breaked, ball):
+    global score
     for item in brick_list:
         x = item[0]
         y = item[1]
@@ -162,18 +159,22 @@ def brick_collision(brick, brick_list, brick_breaked, ball):
             ball.y_vel = -ball.y_vel
             brick_breaked.append(item)
             brick_list.pop(index)
+            score += 1  # Increment score when a brick is hit
         elif y < ball.ballY and ball.ballY < (y + brick.width) and (ball.ballX + ball.ball_radius) > x and ball.ballX < x:
             ball.x_vel = -ball.x_vel
             brick_breaked.append(item)
             brick_list.pop(index)
+            score += 1  # Increment score when a brick is hit
         elif y < ball.ballY and ball.ballY < (y + brick.width) and (ball.ballX - ball.ball_radius) < (x + brick.length) and ball.ballX > (x + brick.length):
             ball.x_vel = -ball.x_vel
             brick_breaked.append(item)
             brick_list.pop(index)
+            score += 1  # Increment score when a brick is hit
         elif x < ball.ballX and ball.ballX < (x + brick.length) and (ball.ballY - ball.ball_radius) < (y + brick.width) and ball.ballY > (y + brick.width):
             ball.y_vel = -ball.y_vel
             brick_breaked.append(item)
             brick_list.pop(index)
+            score += 1  # Increment score when a brick is hit
 
 
 def show_gameover():
@@ -185,6 +186,8 @@ def show_gameover():
 
 
 clock = pygame.time.Clock()
+
+score = 0  # Initialize score
 
 while True:
 
@@ -229,18 +232,21 @@ while True:
         if key_right == True:
             paddle.move_right()
 
-        # ball machanics
+        # ball mechanics
         ball.move()
-        ball.boundries()
+        ball.boundaries()
         ball.limit_vel()
-        #  must review code in the first inquality statement 
+
+        # must review code in the first inequality statement
         if paddle.paddleY + 10 > (ball.ballY + ball.ball_radius) > paddle.paddleY and ball.ballX > paddle.paddleX and ball.ballX < (paddle.paddleX + paddle.length):
             ball.collision_change()
+
         # brick collision
         brick_collision(brick, brick_list, brick_breaked, ball)
 
-        # paddle boundries
-        paddle.boundries()
+        # paddle boundaries
+        paddle.boundaries()
+
         if ball.ballY > scr_height:
             show_gameover()
             over = True
@@ -272,8 +278,13 @@ while True:
         brick.show()
         for brk in brick_breaked:
             brick.update(brk)
-        # brick_collision(brick, brick_list, ball)
         ball.show()
+
+        # Display score
+        font = pygame.font.Font(None, 36)
+        text = font.render(f"Score: {score}", True, (0, 0, 0))
+        screen.blit(text, (10, 10))
+
         if over == True:
             break
 
