@@ -45,8 +45,16 @@ class Bricks():
         num = 1
         color_index = 1
         for item in self.cordinates:
-            pygame.draw.rect(screen, brick_color[color_index-1], ((
-                item[0], item[1]), (self.length-self.spacing, self.width-self.spacing)))
+            x, y = item
+            rect = pygame.Rect(x, y, self.length - self.spacing, self.width - self.spacing)
+            pygame.draw.rect(screen, brick_color[color_index - 1], rect, border_radius=10)
+
+            # Draw corner circles
+            pygame.draw.circle(screen, brick_color[color_index - 1], (x + 10, y + 10), 10)
+            pygame.draw.circle(screen, brick_color[color_index - 1], (x + self.length - 10, y + 10), 10)
+            pygame.draw.circle(screen, brick_color[color_index - 1], (x + 10, y + self.width - 10), 10)
+            pygame.draw.circle(screen, brick_color[color_index - 1], (x + self.length - 10, y + self.width - 10), 10)
+
             num += 1
             if num > color_index * self.rows_bricks:
                 color_index += 1
